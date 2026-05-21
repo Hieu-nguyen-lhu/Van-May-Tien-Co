@@ -8,9 +8,10 @@ import { CharacterProfile } from '../types.ts';
 interface FinalReportProps {
   profile: CharacterProfile;
   onReset: () => void;
+  onStartTribulation: () => void;
 }
 
-export default function FinalReport({ profile, onReset }: FinalReportProps) {
+export default function FinalReport({ profile, onReset, onStartTribulation }: FinalReportProps) {
   const [copied, setCopied] = useState(false);
 
   const {
@@ -386,6 +387,13 @@ Người đo tiên duyên tại Thiên Cơ Các linh trận lúc ${new Date(prof
 
           {/* Copy and Export Actions */}
           <div className="flex flex-col gap-2">
+            <button
+              onClick={onStartTribulation}
+              className="w-full text-center py-3 bg-red-950/20 hover:bg-red-950/35 border border-red-500/45 text-red-200 rounded text-xs uppercase tracking-widest font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 shadow-md"
+            >
+              <Zap className="w-4 h-4 text-amber-300" />
+              Thử vận may độ kiếp (Random)
+            </button>
             <button
               onClick={handleCopyToClipboard}
               className="w-full text-center py-3 bg-gold-theme/10 hover:bg-gold-theme/15 border border-dark-gold/40 text-gold-theme rounded text-xs uppercase tracking-widest font-semibold transition-all cursor-pointer flex items-center justify-center gap-2"

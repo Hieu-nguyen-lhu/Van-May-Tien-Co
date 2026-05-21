@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Sparkles, Compass, Shield, User, HelpCircle } from 'lucide-react';
 import { ORIGINS } from '../data.ts';
+import { playResultChimeSound, playRollTickSound, startRollingSound } from '../soundEffects.ts';
 
 interface IntroStepProps {
   onStartMeasuring: (daoHieu: string, originId: string, gender: string) => void;
@@ -26,6 +27,8 @@ export default function IntroStep({ onStartMeasuring }: IntroStepProps) {
 
   const handleGenerateRandomDaoHieu = () => {
     setRandomNickLoading(true);
+    startRollingSound();
+    playRollTickSound();
     setTimeout(() => {
       const p = prefixes[Math.floor(Math.random() * prefixes.length)];
       const s = suffixes[Math.floor(Math.random() * suffixes.length)];
@@ -36,6 +39,7 @@ export default function IntroStep({ onStartMeasuring }: IntroStepProps) {
       setDaoHieu(`${sur} ${p} ${s}`);
       setRandomNickLoading(false);
       setErrorMsg('');
+      playResultChimeSound();
     }, 280);
   };
 

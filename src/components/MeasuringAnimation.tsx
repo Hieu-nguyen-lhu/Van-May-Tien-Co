@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Sparkles, Shield, Lock, ArrowRight, Zap, RefreshCw, Layers, CheckCircle } from 'lucide-react';
 import { CharacterProfile, Realm, LinhCan, Physique } from '../types.ts';
 import { REALMS, LINH_CANS, PHYSIQUES, calculateProfile, REALM_QUOTES } from '../data.ts';
+import { playLeverPullSound, playResultChimeSound, playRollTickSound, startRollingSound, stopRollingSound } from '../soundEffects.ts';
 
 interface MeasuringAnimationProps {
   daoHieu: string;
@@ -84,6 +85,7 @@ export default function MeasuringAnimation({
     return () => {
       clearInterval(quoteInterval);
       if (spinIntervalRef.current) clearTimeout(spinIntervalRef.current);
+      stopRollingSound();
     };
   }, []);
 
@@ -102,6 +104,7 @@ export default function MeasuringAnimation({
       if (step >= SPIN_DELAYS.length) {
         // Safe landed land target precisely
         setDisplay(targetItem);
+        playResultChimeSound();
         onSettle();
         return;
       }
@@ -109,6 +112,7 @@ export default function MeasuringAnimation({
       // Roll a random item from the pool to simulate reel passing
       const randomItem = pool[Math.floor(Math.random() * pool.length)];
       setDisplay(randomItem);
+      playRollTickSound(1 - step / SPIN_DELAYS.length);
 
       const delay = SPIN_DELAYS[step];
       step++;
@@ -127,6 +131,7 @@ export default function MeasuringAnimation({
     if (realmState === 'RESOLVED' && linhCanState === 'RESOLVED' && physiqueState === 'RESOLVED') return;
 
     // Pull down mechanical feedback
+    playLeverPullSound();
     setLeverActive(true);
 
     setTimeout(() => {
@@ -135,6 +140,7 @@ export default function MeasuringAnimation({
       // Perform spin matching active step
       if (realmState === 'READY') {
         setRealmState('SPINNING');
+        startRollingSound();
         setLeverFeedbackText('Đang ngưng khí hội tụ tinh linh Thần Cấp...');
         startSpinning(REALMS, targetRealm, setDisplayedRealm, () => {
           setRealmState('RESOLVED');
@@ -143,6 +149,7 @@ export default function MeasuringAnimation({
         });
       } else if (linhCanState === 'READY') {
         setLinhCanState('SPINNING');
+        startRollingSound();
         setLeverFeedbackText('Đang sàng lọc phong ba ngũ hành tịnh cốt...');
         startSpinning(LINH_CANS, targetLinhCan, setDisplayedLinhCan, () => {
           setLinhCanState('RESOLVED');
@@ -151,6 +158,7 @@ export default function MeasuringAnimation({
         });
       } else if (physiqueState === 'READY') {
         setPhysiqueState('SPINNING');
+        startRollingSound();
         setLeverFeedbackText('Cửu Thiên lôi lôi lôi kiếm phạt cốt hoán diệt đặc thể...');
         startSpinning(ALL_PHYSIQUES_POOL, targetPhysique, setDisplayedPhysique, () => {
           setPhysiqueState('RESOLVED');
@@ -488,7 +496,7 @@ export default function MeasuringAnimation({
           <div className="flex items-center gap-2">
             <span className="text-[10px] uppercase font-mono tracking-widest text-[#f0ead6]/30">Danh Sách Đang Xem:</span>
             <span className="text-[10px] uppercase font-mono tracking-widest px-2.5 py-1 bg-amber-950/40 text-gold-theme font-bold border border-gold-theme/20 rounded">
-              {activeSegment === 'REALM' && 'Thần Mạch Cảnh Giới (13 bậc)'}
+              {activeSegment === 'REALM' && 'Thần Mạch Cảnh Giới (14 bậc)'}
               {activeSegment === 'LINH_CAN' && 'Ngũ Hành Linh Căn (14 thể)'}
               {activeSegment === 'PHYSIQUE' && 'Thượng Cổ Thể Chất (9 dạng)'}
               {activeSegment === 'COMPLETE' && 'Toàn Bộ Chân Nhân Viên Mãn 💮'}
@@ -502,7 +510,7 @@ export default function MeasuringAnimation({
         {activeSegment === 'REALM' && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 transition-opacity duration-300 animate-fade-in">
             {REALMS.map((r) => {
-              const works = r.world === 'NHAN_GIOI' ? 'Nhân' : r.world === 'LINH_GIOI' ? 'Linh' : 'Tiên';
+              const works = r.world === 'PHE_PHAM' ? 'Phế phẩm' : r.world === 'NHAN_GIOI' ? 'Nhân' : r.world === 'LINH_GIOI' ? 'Linh' : 'Tiên';
               const isSelected = r.id === displayedRealm.id;
               const isFinalMatched = realmState === 'RESOLVED' && r.id === targetRealm.id;
 
@@ -517,7 +525,7 @@ export default function MeasuringAnimation({
                 >
                   <div className="flex items-start justify-between gap-1 w-full">
                     <span className={`text-[9px] font-bold uppercase tracking-wider font-mono ${
-                      r.world === 'TIEN_GIOI' ? 'text-rose-400' : r.world === 'LINH_GIOI' ? 'text-purple-400' : 'text-emerald-400'
+                      r.world === 'PHE_PHAM' ? 'text-neutral-500' : r.world === 'TIEN_GIOI' ? 'text-rose-400' : r.world === 'LINH_GIOI' ? 'text-purple-400' : 'text-emerald-400'
                     }`}>
                       {works} giới
                     </span>

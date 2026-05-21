@@ -1,4 +1,4 @@
-export type RealmType = 'NHAN_GIOI' | 'LINH_GIOI' | 'TIEN_GIOI';
+export type RealmType = 'PHE_PHAM' | 'NHAN_GIOI' | 'LINH_GIOI' | 'TIEN_GIOI';
 
 export interface Realm {
   id: string;
@@ -36,6 +36,7 @@ export interface CharacterProfile {
   id: string;
   daoHieu: string;
   origin: string;
+  originId?: string;
   gender: 'Nam' | 'Nữ' | 'Vô Định';
   realm: Realm;
   linhCan: LinhCan;

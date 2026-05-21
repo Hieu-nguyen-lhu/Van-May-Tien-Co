@@ -4,13 +4,14 @@ import IntroStep from './components/IntroStep.tsx';
 import MeasuringAnimation from './components/MeasuringAnimation.tsx';
 import FinalReport from './components/FinalReport.tsx';
 import IncarnationsList from './components/IncarnationsList.tsx';
+import TribulationTrial from './components/TribulationTrial.tsx';
+import BackgroundMusic from './components/BackgroundMusic.tsx';
 import { CharacterProfile } from './types.ts';
-import { calculateProfile } from './data.ts';
 
 const LOCAL_STORAGE_KEY = 'tienduyen_incarnations_history_v2';
 
 export default function App() {
-  const [step, setStep] = useState<'INTRO' | 'MEASURING' | 'REPORT'>('INTRO');
+  const [step, setStep] = useState<'INTRO' | 'MEASURING' | 'REPORT' | 'TRIBULATION'>('INTRO');
   const [daoHieu, setDaoHieu] = useState('');
   const [originId, setOriginId] = useState('');
   const [gender, setGender] = useState('');
@@ -87,9 +88,11 @@ export default function App() {
       <div className="absolute inset-0 bg-mist pointer-events-none z-0"></div>
       <div className="absolute top-[10%] left-[2%] w-72 h-72 rounded-full bg-amber-950/5 blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[10%] right-[2%] w-96 h-96 rounded-full bg-yellow-950/5 blur-[150px] pointer-events-none"></div>
-
+      <BackgroundMusic />
       {/* Traditional Header Layer */}
-      <Header />
+      <div className="relative z-10">
+        <Header />
+      </div>
 
       {/* Primary Interactive viewport stage */}
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 py-8 flex flex-col items-center justify-start z-10">
@@ -108,11 +111,23 @@ export default function App() {
         )}
 
         {step === 'REPORT' && currentProfile && (
-          <FinalReport profile={currentProfile} onReset={handleReset} />
+          <FinalReport
+            profile={currentProfile}
+            onReset={handleReset}
+            onStartTribulation={() => setStep('TRIBULATION')}
+          />
+        )}
+
+        {step === 'TRIBULATION' && currentProfile && (
+          <TribulationTrial
+            profile={currentProfile}
+            onComplete={handleMeasuringComplete}
+            onBack={() => setStep('REPORT')}
+          />
         )}
 
         {/* Persistent history index (only visible when not currently calibrating/measuring) */}
-        {step !== 'MEASURING' && (
+        {step !== 'MEASURING' && step !== 'TRIBULATION' && (
           <IncarnationsList 
             history={history}
             onSelectProfile={handleSelectProfileFromHistory}

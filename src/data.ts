@@ -20,7 +20,10 @@ export const REALMS: Realm[] = [
   { id: 'kim_tien', world: 'TIEN_GIOI', worldName: 'Tiên Giới', name: 'Kim Tiên Cảnh', stageName: 'Hậu Kỳ', description: 'Thần thức biến đổi thành Niệm Lực, bắt đầu ngưng tụ và vận hành các Quy Tắc vũ trụ cổ xưa.', baseLifespan: 1000000, powerRating: 450000 },
   { id: 'thai_at', world: 'TIEN_GIOI', worldName: 'Tiên Giới', name: 'Thái Ất Ngọc Tiên', stageName: 'Đại Viên Mãn', description: 'Nắm giữ sức mạnh một vùng quy tắc chân chính, chúa tể vạn linh, chưởng thiên cửu giai.', baseLifespan: 990000000, powerRating: 1800000 },
   { id: 'dai_la', world: 'TIEN_GIOI', worldName: 'Tiên Giới', name: 'Đại La Kim Tiên', stageName: 'Đỉnh Phong', description: 'Tồn tại vĩnh hằng giữa hỗn độn thiên hà. Một ý niệm tái lập tinh thành, trường tồn cùng tuế nguyệt.', baseLifespan: 999999999999, powerRating: 8500000 },
-  { id: 'dao_to', world: 'TIEN_GIOI', worldName: 'Tiên Giới', name: 'Đạo Tổ Nguyên Thủy', stageName: 'Hỗn Độn', description: 'Hóa thân của Vạn Pháp đại đạo tối cao. Nắm giữ căn cơ đại đạo duy nhất của cả một thời không thiên hà.', baseLifespan: 999999999999999, powerRating: 99999999 }
+  { id: 'dao_to', world: 'TIEN_GIOI', worldName: 'Tiên Giới', name: 'Đạo Tổ Nguyên Thủy', stageName: 'Hỗn Độn', description: 'Hóa thân của Vạn Pháp đại đạo tối cao. Nắm giữ căn cơ đại đạo duy nhất của cả một thời không thiên hà.', baseLifespan: 999999999999999, powerRating: 99999999 },
+
+  // Phế Phẩm
+  { id: 'phe_pham', world: 'PHE_PHAM', worldName: 'Phế Phẩm', name: 'Phế Phẩm', stageName: 'Chưa Nhập Đạo', description: 'Tiên mạch mờ nhạt, khí hải bế tắc, muốn bước vào đạo đồ phải dựa nhiều vào cơ duyên nghịch mệnh.', baseLifespan: 60, powerRating: 1 }
 ];
 
 // 2. Linh Can Definition
@@ -137,11 +140,12 @@ export const VERDICT_TEMPLATES = {
 };
 
 // predictable deterministic calculation based on name string & options
-export function calculateProfile(daoHieu: string, originId: string, gender: string): CharacterProfile {
+export function calculateProfile(daoHieu: string, originId: string, gender: string, seedSalt = ''): CharacterProfile {
   // Simple deterministic seed generator from Dao Hieu string
   let seed = 0;
-  for (let i = 0; i < daoHieu.length; i++) {
-    seed += daoHieu.charCodeAt(i) * (i + 1);
+  const seedSource = `${daoHieu}${seedSalt}`;
+  for (let i = 0; i < seedSource.length; i++) {
+    seed += seedSource.charCodeAt(i) * (i + 1);
   }
   
   // Mix in origin index
@@ -156,7 +160,10 @@ export function calculateProfile(daoHieu: string, originId: string, gender: stri
   const luckPercentage = (seed % 100); // 0 to 99
   
   let realmIndex = 0;
-  if (luckPercentage < 40) {
+  if (luckPercentage < 8) {
+    // 8% chance of Phế Phẩm, which also weakens later rolls.
+    realmIndex = REALMS.findIndex(r => r.id === 'phe_pham');
+  } else if (luckPercentage < 40) {
     // 40% chance of Nhan Gioi (Luyện Khí, Trúc Cơ, Kết Đan, Nguyên Anh, Hóa Thần)
     realmIndex = seed % 5;
   } else if (luckPercentage < 85) {
@@ -170,29 +177,34 @@ export function calculateProfile(daoHieu: string, originId: string, gender: stri
   // Bound limit
   realmIndex = Math.min(Math.max(0, realmIndex), REALMS.length - 1);
   const realm = { ...REALMS[realmIndex] };
+  const isPhePhamRealm = realm.id === 'phe_pham';
 
   // Adjust Stage based on seed to add high precision
   const stageOptions = ['Sơ Kỳ', 'Trung Kỳ', 'Hậu Kỳ', 'Đại Viên Mãn'];
-  if (realm.id !== 'do_kiep') {
+  if (realm.id !== 'do_kiep' && !isPhePhamRealm) {
     realm.stageName = stageOptions[seed % stageOptions.length];
   }
 
   // Pick Linh Can
   let linhCanIndex = 0;
   // If we got high realm, we have higher chance of legendary Linh can
-  if (luckPercentage > 80) {
+  if (isPhePhamRealm && ((seed * 17) % 100) < 75) {
+    linhCanIndex = LINH_CANS.findIndex(lc => lc.id === 'phe_can_tich');
+  } else if (luckPercentage > 80) {
     // pick from better ones or Hỗn nguyên ngũ linh căn
     const highTierIndices = [0, 1, 2, 8, 12]; // Lôi, Băng, Phong, U Minh, Hỗn Nguyên
     linhCanIndex = highTierIndices[seed % highTierIndices.length];
   } else {
     linhCanIndex = seed % LINH_CANS.length;
   }
+  if (linhCanIndex < 0) linhCanIndex = 0;
   const linhCan = { ...LINH_CANS[linhCanIndex] };
 
   // Pick Physique (80% chance of having a physical body trait, 30% for rare ones)
   let physique: Physique | null = null;
   const physicsLuckySeed = (seed * 73) % 100;
-  if (physicsLuckySeed < 80) {
+  const shouldUsePhamThai = isPhePhamRealm && ((seed * 31) % 100) < 80;
+  if (!shouldUsePhamThai && physicsLuckySeed < 80) {
     let physIndex = 0;
     if (physicsLuckySeed < 15) {
       // Legendary level (Hoang cổ thánh thể, Hồng mông đạo thể, Chân long)
@@ -245,11 +257,21 @@ export function calculateProfile(daoHieu: string, originId: string, gender: stri
   // Lifespan score scaling based on REALM base lifespan
   bLife = clamp(Math.round(Math.log10(realm.baseLifespan) * 10) + (physique?.id === 'hoang_co_thanh_the' ? 15 : 5), 100);
 
+  const isFullPhePhamCombo = isPhePhamRealm && linhCan.id === 'phe_can_tich' && !physique;
+  if (isFullPhePhamCombo) {
+    bSpeed = 36;
+    bMana = 36;
+    bCombat = 36;
+    bLuck = 36;
+    bLife = 36;
+  }
+
   // Generate Rank overall numerical calculation
   // Base rank logic depends on realm + linh can + physique quality
   let rawScore = (bSpeed + bMana + bCombat + bLuck + bLife) / 5;
   
   // Power boost from higher world
+  if (realm.world === 'PHE_PHAM') rawScore -= 25;
   if (realm.world === 'LINH_GIOI') rawScore += 12;
   if (realm.world === 'TIEN_GIOI') rawScore += 25;
 
@@ -264,19 +286,26 @@ export function calculateProfile(daoHieu: string, originId: string, gender: stri
   else rank = 'F';
 
   // Make sure ranking aligns with Linh can SSS quality too!
-  if (linhCan.rarity === 'SSS') {
+  if (linhCan.rarity === 'SSS' && !isPhePhamRealm) {
     rank = 'SSS';
     rawScore = Math.max(96, rawScore);
   }
 
+  if (isPhePhamRealm && (rank === 'SSS' || rank === 'SS' || rank === 'S' || rank === 'A')) {
+    rank = 'B';
+  }
+
   // Formulate appraisal verdict
   const verdicts = VERDICT_TEMPLATES[rank === 'SSS' || rank === 'SS' ? rank : (rank === 'S' || rank === 'A' || rank === 'B' || rank === 'C' ? rank : 'F')];
-  const verdict = verdicts[seed % verdicts.length];
+  const verdict = isFullPhePhamCombo
+    ? 'Phàm nhân phế phẩm rác rưởi vứt đi'
+    : verdicts[seed % verdicts.length];
 
   return {
     id: `tu_tien_${seed}_${Date.now()}`,
     daoHieu,
     origin: originObj.name,
+    originId,
     gender: gender as 'Nam' | 'Nữ' | 'Vô Định',
     realm,
     linhCan,

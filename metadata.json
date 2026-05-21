@@ -1,0 +1,8 @@
+{
+  "name": "Đo Cảnh Giới & Thiên Phú Tu Tiên",
+  "description": "Trang web kiểm tra đo đạc cảnh giới khơi nguồn, hệ thống Linh căn, thể chất đặc biệt và tổng kết xếp hạng thiên phú tu tiên Trung Quốc cổ phong.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

@@ -1,0 +1,124 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Montserrat:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,400..900;1,400..900&family=Inter:wght@300;400;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Playfair Display", "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Inter", "Montserrat", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+  
+  --color-gold-theme: #c5a059;
+  --color-dark-gold: #8c6d31;
+  --color-jade-theme: #2d5a27;
+  --color-ink-theme: #07080a;
+  --color-paper-theme: #f0ead6;
+
+  --color-ink-950: #07080a;
+  --color-ink-900: #0f1015;
+  --color-ink-800: #16181f;
+  --color-jade-500: #2d5a27;
+  --color-jade-400: #3c7a35;
+  --color-gold-400: #c5a059;
+  --color-gold-500: #b59049;
+  --color-gold-600: #8c6d31;
+}
+
+/* Fallback/Custom Classes */
+.border-gold {
+  border: 1px solid var(--color-dark-gold);
+}
+
+.bg-mist {
+  background: radial-gradient(circle at center, rgba(197, 160, 89, 0.08) 0%, transparent 75%);
+}
+
+.glow-text {
+  text-shadow: 0 0 12px rgba(197, 160, 89, 0.55);
+}
+
+.rank-card {
+  background: linear-gradient(135deg, rgba(197, 160, 89, 0.1) 0%, rgba(0,0,0,0) 100%);
+  border-left: 3px solid var(--color-gold-theme);
+}
+
+.compass-ring {
+  border: 2px dashed rgba(140, 109, 49, 0.3);
+  border-radius: 50%;
+  width: 400px;
+  height: 400px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.3;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: rgba(7, 8, 10, 0.8);
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(197, 160, 89, 0.3);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(197, 160, 89, 0.6);
+}
+
+@keyframes pulse-gold {
+  0%, 100% { transform: scale(1); opacity: 0.23; }
+  50% { transform: scale(1.04); opacity: 0.65; }
+}
+
+@keyframes float-runes {
+  0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.5; }
+  50% { transform: translateY(-8px) rotate(3deg); opacity: 0.9; }
+}
+
+@keyframes rotate-array {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-pulse-slow {
+  animation: pulse-gold 4s infinite ease-in-out;
+}
+
+.animate-float-runes {
+  animation: float-runes 5s infinite ease-in-out;
+}
+
+.animate-spin-slow {
+  animation: rotate-array 28s linear infinite;
+}
+
+/* Vignette and Chinese Paper Style */
+.paper-scroll {
+  background-color: var(--color-paper-theme);
+  background-image: radial-gradient(circle, rgba(255,255,255,0.15) 0%, rgba(0,0,0,0.03) 100%);
+  color: #2b2319;
+  border: 1px solid #e1d4be;
+}
+
+.dark-scroll {
+  background-color: #07080a;
+  background-image: 
+    radial-gradient(ellipse at top, rgba(197, 160, 89, 0.12) 0%, transparent 70%),
+    radial-gradient(ellipse at bottom, rgba(0, 0, 0, 0.9) 0%, #07080a 100%);
+  color: var(--color-paper-theme);
+  border: 1px solid rgba(140, 109, 49, 0.25);
+}
+
+/* Ink text effect */
+.ink-text {
+  background: linear-gradient(135deg, var(--color-paper-theme) 0%, var(--color-gold-theme) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-glow-text {
+  text-shadow: 0 0 12px rgba(197, 160, 89, 0.5);
+}
